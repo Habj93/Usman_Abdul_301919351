@@ -4,11 +4,13 @@
 
 ## Case study
 
-My case study is Banking and Fintech Transaction Processing Platform. I designed the database for operations analysts reviewing account activity and platform engineers maintaining transaction integrity, with separate tables named account_types, accounts and transactions. It supports these operations: record a transaction against an account; review transactions for an account over a date range; summarize transaction amounts by account and direction.
+My case study is a Banking and Fintech Transaction Processing Platform, that is designed to help operations analysts to review account activities and platform engineers to maintainthe accuracy and integrity of financial transactions.
+The database consists of three main tables: account_types, accounts and transactions. It supports recording transactions against customer accounts, retrieving account transaction history within specified date ranges, and summarising transaction amounts by account and direction (credit or debit).
 
 ## Portfolio 1: Database Design and Modelling
 
-I organised the relational design into 3 tables. Primary keys identify records, foreign keys preserve the links, and checks enforce the stated business rules. A non-null external_ref may appear on at most one transaction, preventing reuse of a submitted request reference. The normalisation examples show the sample data at 1NF, 2NF and 3NF. All 26 deliberately invalid inserts were rejected without changing the valid sample rows.
+I designed the relational database using three tables, with primary keys to identify records and foreign keys to link the tables. I also added constraints to ensure that the database follows the required business rules. For example, each transaction must have a unique external reference to prevent transaction duplicate.
+I also demonstrated how the sample data meets the requirements of 1NF, 2NF and 3NF. To test the database, I attempted 26 invalid inserts, and all were rejected without affecting the existing valid records. This helped me confirm that the constraints were working correctly and that the database was protecting data integrity.
 
 ![Banking and Fintech Transaction Processing Platform ER diagram](images/Usman_Abdul_301919351_ERDiagram.png)
 
@@ -18,15 +20,19 @@ Figure 1. Tables, keys and relationships. PK: primary key; FK: foreign key; UK: 
 
 ## Portfolio 2: Query Processing and Optimisation
 
-I ran three SQL queries against the sample records. The join returned 1 rows and included SYN-ACCOUNT-001 with PERSONAL. For the index comparison, I used 50,000 separate performance rows. The median lookup time changed from 2.454 ms to 0.322 ms. Both phases returned the same records. The measured plan used the new index. These timings apply to this lookup and environment.
+I ran three SQL queries using the sample data. The JOIN query returned one record, showing SYN-ACCOUNT-001 with the PERSONAL account type.
+To test query performance, I used a separate dataset containing 50,000 records. Before creating the index, the average lookup time was 2.454 ms. After indexing, it dropped to 0.322 ms. Both tests returned the same records, and the execution plan confirmed that the new index was being used.
+This shows that indexing improved the lookup speed in my test. However, the results are specific to this query and the environment in which the test was performed.
 
 ## Portfolio 3: Transactions and Concurrency
 
-I used a temporary counter on transactions to test COMMIT, ROLLBACK and READ COMMITTED isolation. The uncommitted update remained hidden from the other session, and ROLLBACK restored the earlier committed value. Without locking, two increments left the counter at 2. With SELECT FOR UPDATE, Session B waited for Session A and the final value was 3. The helper is confined to this exercise; the case's original business fields stay unchanged.
+I used a temporary counter in the transactions table to test how COMMIT, ROLLBACK and READ COMMITTED isolation work. I observed that changes made before a COMMIT were not visible to the other session, while using ROLLBACK restored the previous saved value.
+I also tested what happens when two sessions update the counter at the same time. Without locking, both sessions attempted to increment it, but the final value was 2 instead of the expected 3. After using SELECT FOR UPDATE, Session B had to wait for Session A to complete before making its update. This time, the final value was 3. The temporary counter was used only for this exercise and did not change the original business fields in the case study.
 
 ## Portfolio 4: NoSQL and Advanced Data Models
 
-I used transaction_events for the case's event documents. MongoDB inserted 2 sample events and returned the expected results for 4 queries. Validation rejected an invalid date type and a duplicate event ID. Embedded snapshots keep related details with an event, while the details field can differ by event type. These are fictional events; PostgreSQL continues to enforce its relational rules.
+I used the transaction_events collection in MongoDB to store event documents for the case study. I added two sample events and ran four queries, all of which returned the expected results. I also tested the validation rules by attempting to insert an invalid date type and a duplicate event ID. MongoDB rejected both entries as expected.
+The embedded snapshots allow related information to be stored alongside each event, while the details field can contain different information depending on the type of event. All the events used were fictional, and PostgreSQL remains responsible for enforcing the relational database rules.
 
 ## Repository and evidence
 
@@ -39,15 +45,17 @@ The portfolio folders contain the SQL and JavaScript, explanations, query plans,
 
 ## Portfolio 5: Distributed and Cloud Database Exercise
 
-I proposed three MongoDB replica members across separate failure zones. The discussion covers primary elections, majority acknowledgement, secondary lag and sharding trade-offs for transaction_events. Replication supports availability, while backups address recovery. PostgreSQL needs its own availability plan. This is the permitted discussion option; no live replica set or failover test was deployed.
+I proposed using three MongoDB replica members, with each member hosted in a separate failure zone to reduce the risk of downtime. I explained how primary elections work, why majority acknowledgement is important, and how delays in secondary replication can affect the system. I also discussed the advantages and trade-offs of using sharding for the transaction_events collection.
+The discussion shows that replication helps keep the database available, while backups are needed to recover lost or damaged data. PostgreSQL would also require a separate availability and recovery plan. This was completed as a discussion-based exercise, as permitted by the assessment. I did not deploy a live replica set or carry out an actual failover test.
 
 ## Individual reflection
 
-I kept account_types, accounts, transactions in separate tables so their details could be maintained without repeating them in every related record. A non-null external_ref may appear on at most one transaction, preventing reuse of a submitted request reference. The constraint tests check this alongside the required values and record links. One issue illustrated by the two-session exercise is that both sessions can read the same value before either update is committed. Locking the row before reading preserves both increments. The index comparison also shows why I need to check the execution plan as well as the final answer: the same result can require different amounts of database work.
+I kept account_types, accounts and transactions in separate tables to avoid repeating data. I also added constraints to prevent duplicate transaction references and ensure that required values and record relationships are valid.
+The two-session test showed how concurrent updates can cause one update to be lost. Using row locking ensured both increments were applied correctly. The index test also showed that queries can return the same results but require different amounts of database work, which is why checking the execution plan matters.
 
 ## AI-use declaration
 
-I used GitHub Copilot and the portfolio generator to help prepare the database model, scripts and explanations. The generator ran the PostgreSQL and MongoDB exercises, checked their outputs and captured the result images.  I remain responsible for checking and explaining the submitted work.
+I used GitHub Copilot and the portfolio generator to help create the database model, scripts and explanations. The generator also ran the PostgreSQL and MongoDB exercises, checked the results and captured screenshots. However, I am responsible for reviewing the work, confirming that the results are correct and being able to explain what I submitted.
 
 ## References
 
